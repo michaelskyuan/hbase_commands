@@ -1,12 +1,12 @@
-Shell
+#Shell
 
-Run HBase CLI commands:
+#Run HBase CLI commands:
 
 $ hbase 
 $ hbase hbck 
 $ hbase shell 
 
-Enable command history:
+#Enable command history:
 
 $ vi ~/.irbrc
 $ cat ~/.irbrc
@@ -19,7 +19,7 @@ Kernel.at_exit do
   end 
 end
 
-Optionally: Restart services when you have suspended the VM and the services do not run anymore (can happen):
+#Optionally: Restart services when you have suspended the VM and the services do not run anymore (can happen):
 
 $ sudo service hbase-master start
 starting master, logging to /var/log/hbase/hbase-hbase-master-quickstart.cloudera.out
@@ -28,7 +28,7 @@ $ sudo service hbase-regionserver start
 Starting Hadoop HBase regionserver daemon: starting regionserver, logging to /var/log/hbase/hbase-hbase-regionserver-quickstart.cloudera.out
 hbase-regionserver.
 
-Start shell, and run some commands:
+#Start shell, and run some commands:
 
 $ hbase shell
 2015-11-25 02:16:29,575 INFO  [main] Configuration.deprecation: hadoop.native.lib is deprecated. Instead, use io.native.lib.available
@@ -47,7 +47,7 @@ hbase(main):002:0> version
 hbase(main):003:0> status
 1 servers, 0 dead, 2.0000 average load
 
-Create a simple table, add some data and retrieve it:
+#Create a simple table, add some data and retrieve it:
 
 hbase(main):004:0> create 'testtable', 'cf1'
 0 row(s) in 0.6880 seconds
@@ -61,7 +61,7 @@ COLUMN                                 CELL
  cf1:col-1                             timestamp=1448446633260, value=val-1                                                                            
 1 row(s) in 0.0260 seconds
 
-Create another table, with two column families, also giving it a description using the arbitrary metadata storage available:
+#Create another table, with two column families, also giving it a description using the arbitrary metadata storage available:
 
 hbase(main):008:0> create 'testtable2','cf1', 'cf2', METADATA => { 'Description' => 'Test table for training' }
 0 row(s) in 0.4250 seconds
@@ -85,7 +85,7 @@ COLUMN FAMILIES DESCRIPTION
 '0', TTL => 'FOREVER', KEEP_DELETED_CELLS => 'FALSE', BLOCKSIZE => '65536', IN_MEMORY => 'false', BLOCKCACHE => 'true'}                                
 2 row(s) in 0.0360 seconds
 
-Add data using a Ruby loop:
+#Add data using a Ruby loop:
 
 hbase(main):012:0> for i in 1..100 do put 'testtable', "row-3{i}", 'cf1:col-1', "val-#{i}" end 
 0 row(s) in 0.0100 seconds
@@ -100,7 +100,7 @@ hbase(main):012:0> for i in 1..100 do put 'testtable', "row-3{i}", 'cf1:col-1', 
 
 => 1..100
 
-Access rows directly using “get”:
+#Access rows directly using “get”:
 
 hbase(main):013:0> get 'testtable', 'row-1'
 COLUMN                                 CELL                                                                                                            
@@ -111,13 +111,13 @@ hbase(main):014:0> get 'testtable', 'row-2'
 COLUMN                                 CELL                                                                                                            
 0 row(s) in 0.0040 seconds
 
-Using a “scan” to retrieve more rows, here between a start and end row:
+#Using a “scan” to retrieve more rows, here between a start and end row:
 
 hbase(main):015:0> scan 'testtable', { STARTROW => 'row-5', STOPROW => 'row-15' }
 ROW                                    COLUMN+CELL                                                                                                     
 0 row(s) in 0.0340 seconds
 
-Question: Why is there nothing returned? Let’s see what is inside using a scan with a limit:
+#Question: Why is there nothing returned? Let’s see what is inside using a scan with a limit:
 
 hbase(main):016:0> scan 'testtable', LIMIT => 3
 ROW                                    COLUMN+CELL                                                                                                     
@@ -125,7 +125,7 @@ ROW                                    COLUMN+CELL
  row-3{i}                              column=cf1:col-1, timestamp=1448446823246, value=val-100                                                        
 2 row(s) in 0.0210 seconds
 
-Apparently the script was wrong, there was a “3” in there instead of a “#”. Truncating the table and reinserting the data:
+#Apparently the script was wrong, there was a “3” in there instead of a “#”. Truncating the table and reinserting the data:
 
 hbase(main):018:0> truncate 'testtable'
 Truncating 'testtable' table (it may take a while):
@@ -146,13 +146,13 @@ hbase(main):019:0> for i in 1..100 do put 'testtable', "row-#{i}", 'cf1:col-1', 
 
 => 1..100
 
-Trying the scan again, but… still nothing:
+#Trying the scan again, but… still nothing:
 
 hbase(main):020:0> scan 'testtable', { STARTROW => 'row-5', STOPROW => 'row-15' }
 ROW                                    COLUMN+CELL                                                                                                     
 0 row(s) in 0.0110 seconds
 
-Verifying the content again, we realize that the lexicographical sorting means we cannot use “row-5” as start, and "row-15” as the stop row parameter, because the are sorted the other way around (since the “1” in “row-15” is less than the “5” in “row-5” comparing the keys byte by byte):
+#Verifying the content again, we realize that the lexicographical sorting means we cannot use “row-5” as start, and "row-15” as the stop row parameter, because the are sorted the other way around (since the “1” in “row-15” is less than the “5” in “row-5” comparing the keys byte by byte):
 
 hbase(main):022:0> scan 'testtable', LIMIT => 20
 ROW                                    COLUMN+CELL                                                                                                     
@@ -178,7 +178,7 @@ ROW                                    COLUMN+CELL
  row-26                                column=cf1:col-1, timestamp=1448446949663, value=val-26                                                         
 20 row(s) in 0.0750 seconds
 
-To fix the scan, we have to use proper start and stop row keys, so that they really sort one after the other:
+#To fix the scan, we have to use proper start and stop row keys, so that they really sort one after the other:
 
 hbase(main):024:0> scan 'testtable', { STARTROW => 'row-5', STOPROW => 'row-55' }
 ROW                                    COLUMN+CELL                                                                                                     
@@ -190,7 +190,7 @@ ROW                                    COLUMN+CELL
  row-54                                column=cf1:col-1, timestamp=1448446949856, value=val-54                                                         
 6 row(s) in 0.0390 seconds
 
-Let’s now create a namespace, and a more specific table, setting the stored versions higher (from the default of 1) and enabling Snappy compression to:
+#Let’s now create a namespace, and a more specific table, setting the stored versions higher (from the default of 1) and enabling Snappy compression to:
 
 hbase(main):025:0> create_namespace 'development'
 0 row(s) in 0.0630 seconds
@@ -198,7 +198,7 @@ hbase(main):025:0> create_namespace 'development'
 hbase(main):026:0> create 'development:staging-src1', { NAME => 'cf1', VERSIONS => 3, COMPRESSION => 'SNAPPY' }, 'cf2' 
 0 row(s) in 0.5190 seconds
 
-The Ruby shell allows to store the table reference in a variable for reuse. Using the variable or the above fully specified shell commands is (well, should be) synonymous:
+#The Ruby shell allows to store the table reference in a variable for reuse. Using the variable or the above fully specified shell commands is (well, should be) synonymous:
 
 hbase(main):030:0> t = get_table 'development:staging-src1'
 0 row(s) in 0.0000 seconds
@@ -266,7 +266,7 @@ COLUMN                                 CELL
  cf1:col-2                             timestamp=1448447750441
 1 row(s) in 0.0280 seconds
 
-Using the JRuby way of creating a Java Date instance, we can decipher the epoch by converting it into a human-readable date:
+#Using the JRuby way of creating a Java Date instance, we can decipher the epoch by converting it into a human-readable date:
 
 hbase(main):044:0> java.util.Date.new(1448447750441)
 => #<Java::JavaUtil::Date:0x22ffc505>
@@ -294,7 +294,7 @@ SNAPSHOT                               TABLE + CREATION TIME
 
 => ["devstagingsrc1-before-qa"]
 
-Let us now modify the original table, by deleting a row (note we are using “deleteall”, which applies to a row, since “delete” applies to a column instead):
+#Let us now modify the original table, by deleting a row (note we are using “deleteall”, which applies to a row, since “delete” applies to a column instead):
 
 hbase(main):051:0> deleteall 'development:staging-src1', 'row-1'
 0 row(s) in 0.0290 seconds
@@ -304,7 +304,7 @@ ROW                                    COLUMN+CELL
  row-2                                 column=cf1:col-2, timestamp=1448447625100, value=val-2                                                          
 1 row(s) in 0.0130 seconds
 
-We restore the snapshot by cloning it into a new table:
+#We restore the snapshot by cloning it into a new table:
 
 hbase(main):055:0> clone_snapshot 'devstagingsrc1-before-qa', 'development:staging-src1-clone'
 0 row(s) in 0.4930 seconds
@@ -327,7 +327,7 @@ ROW                                    COLUMN+CELL
  row-2                                 column=cf1:col-2, timestamp=1448447625100, value=val-2                                                          
 2 row(s) in 0.0300 seconds
 
-All the data is back, but in a new table. To restore the old table in place, we first need to disable it, then invoke the restore command:
+#All the data is back, but in a new table. To restore the old table in place, we first need to disable it, then invoke the restore command:
 
 hbase(main):058:0> disable 'development:staging-src1'
 0 row(s) in 1.2820 seconds
@@ -376,7 +376,7 @@ ROW                                    COLUMN+CELL
  row-2                                 column=cf1:col-2, timestamp=1448447625100, value=val-2                                                          
 2 row(s) in 0.0260 seconds
 
-Snapshots can be deleted in bulk like so:
+#Snapshots can be deleted in bulk like so:
 
 hbase(main):065:0>
 hbase(main):065:0> delete_all_snapshot '.*'
@@ -404,7 +404,7 @@ testtable2
 
 => ["development:staging-src1", "development:staging-src1-clone", "testtable", "testtable2"]
 
-We resume with the table from earlier using the reference variable (just because):
+#We resume with the table from earlier using the reference variable (just because):
 
 hbase(main):068:0> t.describe
 Table development:staging-src1 is ENABLED                                                                                                              
@@ -416,12 +416,12 @@ R', MIN_VERSIONS => '0', KEEP_DELETED_CELLS => 'FALSE', BLOCKSIZE => '65536', IN
 , MIN_VERSIONS => '0', KEEP_DELETED_CELLS => 'FALSE', BLOCKSIZE => '65536', IN_MEMORY => 'false', BLOCKCACHE => 'true'}                                
 2 row(s) in 0.0400 seconds
 
-We put a new value into an existing column to test the versioning that HBase supports:
+#We put a new value into an existing column to test the versioning that HBase supports:
 
 hbase(main):069:0> t.put 'row-1', 'cf1:col-1', 'val-99'
 0 row(s) in 0.0090 seconds
 
-The scan shows the current content of the table, which is the default setting:
+#The scan shows the current content of the table, which is the default setting:
 
 hbase(main):070:0> t.scan
 ROW                                    COLUMN+CELL                                                                                                    
@@ -431,7 +431,7 @@ ROW                                    COLUMN+CELL
  row-2                                 column=cf1:col-2, timestamp=1448447625100, value=val-2                                                          
 2 row(s) in 0.0250 seconds
 
-You can override the versions to returned per scan, and also reverse the output. Note how using the variable does not work (though it should):
+#You can override the versions to returned per scan, and also reverse the output. Note how using the variable does not work (though it should):
 
 hbase(main):072:0> t.scan, { REVERSED => true }
 SyntaxError: (hbase):73: syntax error, unexpected end-of-file
@@ -457,12 +457,12 @@ ROW                                    COLUMN+CELL
  row-1                                 column=cf2:col-1, timestamp=1448447614823, value=val-1                                                          
 2 row(s) in 0.0370 seconds
 
-Note: The reversed scan is only operating on the rows! Within the row the columns are still sorted ascending. This is caused by the internal data structures (the HFile mainly) being specifically built to sort ascending internally (and descending for versions). This cannot be easily reversed. We now will delete a column to show the internal ordering more:
+#Note: The reversed scan is only operating on the rows! Within the row the columns are still sorted ascending. This is caused by the internal data structures (the HFile mainly) being specifically built to sort ascending internally (and descending for versions). This cannot be easily reversed. We now will delete a column to show the internal ordering more:
 
 hbase(main):079:0> delete 'development:staging-src1', 'row-1', 'cf1:col-2'
 0 row(s) in 0.0110 seconds
 
-A normal scan does not list the deleted cell:
+#A normal scan does not list the deleted cell:
 
 hbase(main):080:0> scan 'development:staging-src1', { VERSIONS => 10 }
 ROW                                    COLUMN+CELL                                                                                                    
@@ -472,7 +472,7 @@ ROW                                    COLUMN+CELL
  row-2                                 column=cf1:col-2, timestamp=1448447625100, value=val-2                                                          
 2 row(s) in 0.0230 seconds
 
-But a special flag called “RAW” enables the retrieval of the stored delete marker and masked cell. This only works until the next compaction (one that does include removal of old data):
+#But a special flag called “RAW” enables the retrieval of the stored delete marker and masked cell. This only works until the next compaction (one that does include removal of old data):
 
 hbase(main):081:0> scan 'development:staging-src1', { VERSIONS => 10, RAW => true }
 ROW                                    COLUMN+CELL                                                                                                    
@@ -484,7 +484,7 @@ ROW                                    COLUMN+CELL
  row-2                                 column=cf1:col-2, timestamp=1448447625100, value=val-2                                                          
 2 row(s) in 0.0180 seconds
 
-Cleaning up means disabling and dropping the tables, here the bulk versions:
+#Cleaning up means disabling and dropping the tables, here the bulk versions:
 
 hbase(main):082:0>  disable_all '.*'
 development:staging-src1                                                                                                                               
@@ -512,7 +512,7 @@ TABLE
 
 => []
 
-Next we create a namespace and table we need for the Hive example later on. It used Ruby again to generate test data:
+#Next we create a namespace and table we need for the Hive example later on. It used Ruby again to generate test data:
 
 hbase(main):085:0> create_namespace 'salesdw'
 0 row(s) in 0.0330 seconds
@@ -555,9 +555,9 @@ ROW                                    COLUMN+CELL
 hbase(main):100:0> quit
 
 
-Code
+#Code
 
-Use book example code:
+#Use book example code:
 
 $ cd ~
 $ git clone https://github.com/larsgeorge/hbase-book.git
@@ -567,14 +567,14 @@ $ ch03/bin/run.sh client.PutExample
 $ ch03/bin/run.sh client.ScanExample
 $ ch05/bin/run.sh admin.NamespaceExample
 
-YCSB
+#YCSB
 
-Clone YCSB:
+#Clone YCSB:
 
 $ cd ~
 $ git clone https://github.com/brianfrankcooper/YCSB.git
 
-Unpack binary:
+#Unpack binary:
 
 $ cd YCSB/
 $ mvn package -DskipTests
@@ -582,32 +582,32 @@ $ cd ..
 $ tar -zxvf YCSB/distribution/target/ycsb-0.6.0-SNAPSHOT.tar.gz 
 $ cd ycsb-0.6.0-SNAPSHOT/
 
-Test with basic workload:
+#Test with basic workload:
 
 $ seq -w 0 99 | sed 's/^/user/' > splits.txt
 $ echo "create 'usertable', 'cf1', { SPLITS_FILE => 'splits.txt'}" | hbase shell
 $ bin/ycsb load hbase10 -P workloads/workloada -p columnfamily=cf1 
 
-Performance Evaluation (PE)
+#Performance Evaluation (PE)
 
-Run PE, loading data:
+#Run PE, loading data:
 
 $ hbase pe
 $ #hbase pe sequentialWrite 1
 $ hbase pe --nomapred sequentialWrite 1
 $ hbase pe --nomapred --compress=SNAPPY --valueZipf=1024 sequentialWrite 1
 
-Check in shell:
+#Check in shell:
 
 $ hbase shell
 
-Read data:
+#Read data:
 
 $ hbase pe --nomapred randomRead 1
 
-Configuration Tuning
+#Configuration Tuning
 
-Block Cache:
+#Block Cache:
 
 <property>
    <name>hbase.bucketcache.combinedcache.enabled</name>
@@ -626,7 +626,7 @@ Block Cache:
    <value>1024</value>
  </property>
 
-Hive
+#Hive
 
 [cloudera@quickstart hbase-book]$ hive
 ...
